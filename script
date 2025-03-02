@@ -1,99 +1,96 @@
-local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+-- Создаем основной экран для Keybinds
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-local Window = Library:CreateWindow{
-    Title = `Fluent {Library.Version}`,
-    SubTitle = "by Actual Master Oogway",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(830, 525),
-    Resize = true,
-    MinSize = Vector2.new(470, 380),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.RightControl
-}
+local keybindsFrame = Instance.new("Frame")
+keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
+keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75) -- Центр экрана
+keybindsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keybindsFrame.BorderSizePixel = 0
+keybindsFrame.Visible = false -- По умолчанию скрыт
+keybindsFrame.Parent = screenGui
 
-local Tabs = {
-    Main = Window:CreateTab{
-        Title = "Main",
-        Icon = "phosphor-users-bold"
-    },
-    Settings = Window:CreateTab{
-        Title = "Settings",
-        Icon = "settings"
-    },
-    Visuals = Window:CreateTab{
-        Title = "Visuals",
-        Icon = "eye"
-    }
-}
+local keybindsTitle = Instance.new("TextLabel")
+keybindsTitle.Text = "Keybinds"
+keybindsTitle.Size = UDim2.new(1, 0, 0, 30)
+keybindsTitle.Position = UDim2.new(0, 0, 0, 0)
+keybindsTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+keybindsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsTitle.Font = Enum.Font.SourceSansBold
+keybindsTitle.TextSize = 18
+keybindsTitle.Parent = keybindsFrame
 
-local Options = Library.Options
+local keybindsList = Instance.new("TextLabel")
+keybindsList.Text = "[Keybind] Fly - F\n[Keybind] Noclip - N\n[Keybind] Speed Boost - LeftShift"
+keybindsList.Size = UDim2.new(1, -10, 1, -40)
+keybindsList.Position = UDim2.new(0, 5, 0, 35)
+keybindsList.BackgroundTransparency = 1
+keybindsList.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsList.Font = Enum.Font.SourceSans
+keybindsList.TextSize = 16
+keybindsList.TextXAlignment = Enum.TextXAlignment.Left
+keybindsList.TextYAlignment = Enum.TextYAlignment.Top
+keybindsList.Parent = keybindsFrame
 
--- Keybinds Data
-local keybindsList = {
-    { Name = "Fly", Key = "F" },
-    { Name = "Noclip", Key = "N" },
-    { Name = "Speed Boost", Key = "LeftShift" }
-}
+-- Функция для перемещения Keybinds
+local dragging = false
+local dragInput, dragStart, startPos
 
--- Функция для отображения Keybinds
-local function updateKeybindsDisplay()
-    local keybindsText = ""
-    for _, keybind in pairs(keybindsList) do
-        keybindsText = keybindsText .. string.format("[Keybind] %s - %s\n", keybind.Name, keybind.Key)
+keybindsTitle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = keybindsFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
-    return keybindsText
+end)
+
+keybindsTitle.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        keybindsFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Переключатель для Keybinds
+local keybindsEnabled = false
+local toggleKeybind = Enum.KeyCode.K -- Клавиша для переключения Keybinds
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        keybindsEnabled = not keybindsEnabled
+        keybindsFrame.Visible = keybindsEnabled
+    end
+end)
+
+-- Уведомление о включении/выключении Keybinds
+local function notify(message)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Keybinds",
+        Text = message,
+        Duration = 3
+    })
 end
 
--- Вкладка Visuals: Keybinds Display
-local keybindsParagraph = Tabs.Visuals:CreateParagraph("KeybindsDisplay", {
-    Title = "Keybinds",
-    Content = updateKeybindsDisplay(),
-    TitleAlignment = "Left",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
-
--- Вкладка Visuals: Переключатель Keybinds
-local KeybindsToggle = Tabs.Visuals:CreateToggle("KeybindsToggle", {
-    Title = "Show Keybinds",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            keybindsParagraph:SetValue(updateKeybindsDisplay())
-            Library:Notify{
-                Title = "Keybinds",
-                Content = "Keybinds are now visible.",
-                Duration = 3
-            }
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        if keybindsEnabled then
+            notify("Keybinds are now visible.")
         else
-            keybindsParagraph:SetValue("Keybinds are hidden.")
-            Library:Notify{
-                Title = "Keybinds",
-                Content = "Keybinds are now hidden.",
-                Duration = 3
-            }
+            notify("Keybinds are now hidden.")
         end
     end
-})
-
--- Addons:
-SaveManager:SetLibrary(Library)
-InterfaceManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes{}
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-Window:SelectTab(1)
-
-Library:Notify{
-    Title = "Fluent",
-    Content = "The script has been loaded.",
-    Duration = 8
-}
-
-SaveManager:LoadAutoloadConfig()
+end)
