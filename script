@@ -1,47 +1,169 @@
--- Создание ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
--- Создание основного фрейма
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
+local Window = Library:CreateWindow{
+    Title = `Fluent {Library.Version}`,
+    SubTitle = "by Actual Master Oogway",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(830, 525),
+    Resize = true,
+    MinSize = Vector2.new(470, 380),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+}
 
--- Создание заголовка
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-title.Text = "Настройки игры"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextScaled = true
-title.Parent = mainFrame
+local Tabs = {
+    Main = Window:CreateTab{
+        Title = "Main",
+        Icon = "phosphor-users-bold"
+    },
+    Visuals = Window:CreateTab{
+        Title = "Visuals",
+        Icon = "eye"
+    }
+}
 
--- Создание кнопки для ночного режима
-local nightModeButton = Instance.new("TextButton")
-nightModeButton.Size = UDim2.new(0, 200, 0, 50)
-nightModeButton.Position = UDim2.new(0.5, -100, 0, 70)
-nightModeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-nightModeButton.Text = "Включить ночной режим"
-nightModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-nightModeButton.TextScaled = true
-nightModeButton.Parent = mainFrame
+local Options = Library.Options
 
--- Функция для включения ночного режима
-local function toggleNightMode()
-    local lighting = game:GetService("Lighting")
-    if lighting.Brightness > 0 then
-        lighting.Brightness = 0
-        lighting.ClockTime = 0
-    else
-        lighting.Brightness = 1
-        lighting.ClockTime = 12
-    end
+local watermarkFrame = Instance.new("Frame")
+watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
+watermarkFrame.Position = UDim2.new(0.1, 0, 0.05, 0)
+watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+watermarkFrame.BorderSizePixel = 0
+watermarkFrame.Visible = true
+watermarkFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local watermarkText = Instance.new("TextLabel")
+watermarkText.Text = "NL | About137 | Best Hvt Community Config | 40 ms"
+watermarkText.Size = UDim2.new(1, 0, 1, 0)
+watermarkText.Position = UDim2.new(0, 0, 0, 0)
+watermarkText.BackgroundTransparency = 1
+watermarkText.TextColor3 = Color3.fromRGB(255, 255, 255)
+watermarkText.Font = Enum.Font.SourceSansBold
+watermarkText.TextSize = 16
+watermarkText.TextXAlignment = Enum.TextXAlignment.Left
+watermarkText.TextYAlignment = Enum.TextYAlignment.Center
+watermarkText.Parent = watermarkFrame
+
+local function updateWatermark()
+    local ping = math.random(30, 50)
+    watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config | %d ms", ping)
 end
 
-nightModeButton.MouseButton1Click:Connect(toggleNightMode)
+spawn(function()
+    while true do
+        updateWatermark()
+        wait(1)
+    end
+end)
 
--- Добавление других настроек (например, скорость, высота прыжка и т.д.)
--- Вы можете добавить больше элементов управления и функций по аналогии
+local dragging = false
+local dragInput, dragStart, startPos
+
+watermarkFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = watermarkFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+watermarkFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        watermarkFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+local keybindsFrame = Instance.new("Frame")
+keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
+keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
+keybindsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keybindsFrame.BorderSizePixel = 0
+keybindsFrame.Visible = false
+keybindsFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local keybindsTitle = Instance.new("TextLabel")
+keybindsTitle.Text = "Keybinds"
+keybindsTitle.Size = UDim2.new(1, 0, 0, 30)
+keybindsTitle.Position = UDim2.new(0, 0, 0, 0)
+keybindsTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+keybindsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsTitle.Font = Enum.Font.SourceSansBold
+keybindsTitle.TextSize = 18
+keybindsTitle.Parent = keybindsFrame
+
+local keybindsList = Instance.new("TextLabel")
+keybindsList.Text = "[Keybind] Fly - F\n[Keybind] Noclip - N\n[Keybind] Speed Boost - LeftShift"
+keybindsList.Size = UDim2.new(1, -10, 1, -40)
+keybindsList.Position = UDim2.new(0, 5, 0, 35)
+keybindsList.BackgroundTransparency = 1
+keybindsList.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsList.Font = Enum.Font.SourceSans
+keybindsList.TextSize = 16
+keybindsList.TextXAlignment = Enum.TextXAlignment.Left
+keybindsList.TextYAlignment = Enum.TextYAlignment.Top
+keybindsList.Parent = keybindsFrame
+
+local keybindsEnabled = false
+local toggleKeybind = Enum.KeyCode.K
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        keybindsEnabled = not keybindsEnabled
+        keybindsFrame.Visible = keybindsEnabled
+    end
+end)
+
+local function notify(message)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Keybinds",
+        Text = message,
+        Duration = 3
+    })
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        if keybindsEnabled then
+            notify("Keybinds are now visible.")
+        else
+            notify("Keybinds are now hidden.")
+        end
+    end
+end)
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes{}
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Library:Notify{
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+}
+
+SaveManager:LoadAutoloadConfig()
