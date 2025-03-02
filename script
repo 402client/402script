@@ -1,9 +1,10 @@
--- Создаем Watermark
+-- Создаем ScreenGui для интерфейса
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- Watermark
 local watermarkFrame = Instance.new("Frame")
-watermarkFrame.Size = UDim2.new(0, 200, 0, 50)
+watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
 watermarkFrame.Position = UDim2.new(0.1, 0, 0.05, 0) -- Позиция по умолчанию
 watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 watermarkFrame.BorderSizePixel = 0
@@ -29,10 +30,12 @@ local function updateWatermark()
 end
 
 -- Обновляем Watermark каждую секунду
-while true do
-    updateWatermark()
-    wait(1)
-end
+spawn(function()
+    while true do
+        updateWatermark()
+        wait(1)
+    end
+end)
 
 -- Функция для перемещения Watermark
 local dragging = false
@@ -62,5 +65,68 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     if dragging and input == dragInput then
         local delta = input.Position - dragStart
         watermarkFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Keybinds
+local keybindsFrame = Instance.new("Frame")
+keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
+keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75) -- Центр экрана
+keybindsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keybindsFrame.BorderSizePixel = 0
+keybindsFrame.Visible = false -- По умолчанию скрыт
+keybindsFrame.Parent = screenGui
+
+local keybindsTitle = Instance.new("TextLabel")
+keybindsTitle.Text = "Keybinds"
+keybindsTitle.Size = UDim2.new(1, 0, 0, 30)
+keybindsTitle.Position = UDim2.new(0, 0, 0, 0)
+keybindsTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+keybindsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsTitle.Font = Enum.Font.SourceSansBold
+keybindsTitle.TextSize = 18
+keybindsTitle.Parent = keybindsFrame
+
+local keybindsList = Instance.new("TextLabel")
+keybindsList.Text = "[Keybind] Fly - F\n[Keybind] Noclip - N\n[Keybind] Speed Boost - LeftShift"
+keybindsList.Size = UDim2.new(1, -10, 1, -40)
+keybindsList.Position = UDim2.new(0, 5, 0, 35)
+keybindsList.BackgroundTransparency = 1
+keybindsList.TextColor3 = Color3.fromRGB(255, 255, 255)
+keybindsList.Font = Enum.Font.SourceSans
+keybindsList.TextSize = 16
+keybindsList.TextXAlignment = Enum.TextXAlignment.Left
+keybindsList.TextYAlignment = Enum.TextYAlignment.Top
+keybindsList.Parent = keybindsFrame
+
+-- Переключатель для Keybinds
+local keybindsEnabled = false
+local toggleKeybind = Enum.KeyCode.K -- Клавиша для переключения Keybinds
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        keybindsEnabled = not keybindsEnabled
+        keybindsFrame.Visible = keybindsEnabled
+    end
+end)
+
+-- Уведомление о включении/выключении Keybinds
+local function notify(message)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Keybinds",
+        Text = message,
+        Duration = 3
+    })
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKeybind then
+        if keybindsEnabled then
+            notify("Keybinds are now visible.")
+        else
+            notify("Keybinds are now hidden.")
+        end
     end
 end)
