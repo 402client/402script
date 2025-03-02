@@ -45,7 +45,7 @@ local Options = Library.Options
 local watermarkFrame = Instance.new("Frame")
 watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
 watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40)
-watermarkFrame.AnchorPoint = Vector2.new(0.5, 1) 
+watermarkFrame.AnchorPoint = Vector2.new(0.5, 1)
 watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 watermarkFrame.BorderSizePixel = 0
 watermarkFrame.Visible = true
@@ -75,27 +75,44 @@ spawn(function()
     end
 end)
 
--- ESP
-local espEnabled = false
-
 local function createESP(player)
     local character = player.Character
     if not character then return end
 
-    local highlight = Instance.new("Highlight")
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.FillColor = Color3.new(1, 0, 0)
-    highlight.OutlineColor = Color3.new(1, 1, 1)
-    highlight.Parent = character
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+
+    local espBox = Instance.new("Part")
+    espBox.Size = Vector3.new(4, 9, 4)
+    espBox.Anchored = true
+    espBox.CanCollide = false
+    espBox.Transparency = 0.5
+    espBox.Color = Color3.new(0, 1, 0)
+    espBox.Material = Enum.Material.Neon
+    espBox.CFrame = rootPart.CFrame
+    espBox.Parent = workspace
+
+    local function updateESPBox()
+        if not rootPart or not espBox then return end
+        espBox.CFrame = rootPart.CFrame
+    end
+
+    local connection = rootPart:GetPropertyChangedSignal("CFrame"):Connect(updateESPBox)
+
+    character:GetPropertyChangedSignal("Parent"):Connect(function()
+        if not character.Parent then
+            connection:Disconnect()
+            espBox:Destroy()
+        end
+    end)
 end
 
 local function removeESP(player)
     local character = player.Character
     if not character then return end
 
-    for _, child in pairs(character:GetChildren()) do
-        if child:IsA("Highlight") then
+    for _, child in pairs(workspace:GetChildren()) do
+        if child:IsA("Part") and child.Name == "ESPBox" then
             child:Destroy()
         end
     end
@@ -113,7 +130,18 @@ local function updateESP()
     end
 end
 
--- Переключатель ESP
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        if espEnabled then
+            createESP(player)
+        end
+    end)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
+
 local espToggle = Tabs.Main:CreateToggle("ESP", {
     Title = "Enable ESP",
     Default = false,
@@ -123,7 +151,6 @@ local espToggle = Tabs.Main:CreateToggle("ESP", {
     end
 })
 
--- Addons:
 SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
