@@ -23,111 +23,31 @@ local Tabs = {
         Title = "Settings",
         Icon = "settings"
     },
-    Fly = Window:CreateTab{
-        Title = "Fly",
-        Icon = "feather-airplay"
+    Visuals = Window:CreateTab{
+        Title = "Visuals",
+        Icon = "eye"
     }
 }
 
 local Options = Library.Options
 
--- Fly Variables
-local flying = false
-local flySpeed = 50
-local flyKeybind = Enum.KeyCode.F
-local bodyVelocity = nil
-local userInputService = game:GetService("UserInputService")
-local runService = game:GetService("RunService")
-
--- Fly Function
-local function startFlying()
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-
-    if not rootPart then return end
-
-    -- Create BodyVelocity if it doesn't exist
-    if not bodyVelocity then
-        bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bodyVelocity.Parent = rootPart
-    end
-
-    -- Fly Logic
-    while flying and rootPart and bodyVelocity do
-        local direction = Vector3.new()
-
-        -- Movement Controls
-        if userInputService:IsKeyDown(Enum.KeyCode.W) then
-            direction = direction + (rootPart.CFrame.LookVector * flySpeed)
-        end
-        if userInputService:IsKeyDown(Enum.KeyCode.S) then
-            direction = direction - (rootPart.CFrame.LookVector * flySpeed)
-        end
-        if userInputService:IsKeyDown(Enum.KeyCode.A) then
-            direction = direction - (rootPart.CFrame.RightVector * flySpeed)
-        end
-        if userInputService:IsKeyDown(Enum.KeyCode.D) then
-            direction = direction + (rootPart.CFrame.RightVector * flySpeed)
-        end
-        if userInputService:IsKeyDown(Enum.KeyCode.Space) then
-            direction = direction + Vector3.new(0, flySpeed, 0)
-        end
-        if userInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-            direction = direction - Vector3.new(0, flySpeed, 0)
-        end
-
-        -- Apply Velocity
-        bodyVelocity.Velocity = direction
-        runService.Heartbeat:Wait()
-    end
-
-    -- Cleanup
-    if bodyVelocity then
-        bodyVelocity:Destroy()
-        bodyVelocity = nil
-    end
-end
-
--- Fly Keybind
-local FlyKeybind = Tabs.Fly:CreateKeybind("FlyKeybind", {
-    Title = "Fly Keybind",
-    Mode = "Toggle",
-    Default = flyKeybind,
-    Callback = function(Value)
-        flying = Value
-        if flying then
-            startFlying()
-        end
-    end,
-    ChangedCallback = function(New)
-        flyKeybind = New
-    end
-})
-
--- Fly Speed Slider
-local FlySpeedSlider = Tabs.Fly:CreateSlider("FlySpeed", {
-    Title = "Fly Speed",
-    Description = "Adjust the speed of flying",
-    Default = flySpeed,
-    Min = 10,
-    Max = 100,
-    Rounding = 1,
-    Callback = function(Value)
-        flySpeed = Value
-    end
-})
-
--- Fly Toggle
-local FlyToggle = Tabs.Fly:CreateToggle("FlyToggle", {
-    Title = "Enable Fly",
+-- Keybinds Toggle
+local KeybindsToggle = Tabs.Visuals:CreateToggle("KeybindsToggle", {
+    Title = "Keybinds",
     Default = false,
     Callback = function(Value)
-        flying = Value
-        if flying then
-            startFlying()
+        if Value then
+            Library:Notify{
+                Title = "Keybinds",
+                Content = "Keybinds are now visible.",
+                Duration = 3
+            }
+        else
+            Library:Notify{
+                Title = "Keybinds",
+                Content = "Keybinds are now hidden.",
+                Duration = 3
+            }
         end
     end
 })
