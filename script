@@ -19,9 +19,9 @@ local Tabs = {
         Title = "Main",
         Icon = "phosphor-users-bold"
     },
-    Visuals = Window:CreateTab{
-        Title = "Visuals",
-        Icon = "eye"
+    Settings = Window:CreateTab{
+        Title = "Settings",
+        Icon = "settings"
     }
 }
 
@@ -57,36 +57,6 @@ spawn(function()
     while true do
         updateWatermark()
         wait(1)
-    end
-end)
-
-local dragging = false
-local dragInput, dragStart, startPos
-
-watermarkFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = watermarkFrame.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-watermarkFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and input == dragInput then
-        local delta = input.Position - dragStart
-        watermarkFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
@@ -132,25 +102,56 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     end
 end)
 
-local function notify(message)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Keybinds",
-        Text = message,
-        Duration = 3
-    })
+-- ESP
+local espEnabled = false
+local espToggle = Tabs.Main:CreateToggle("ESP", {
+    Title = "Enable ESP",
+    Default = false,
+    Callback = function(Value)
+        espEnabled = Value
+    end
+})
+
+local function createESP(player)
+    local character = player.Character
+    if not character then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.FillColor = Color3.new(1, 0, 0)
+    highlight.OutlineColor = Color3.new(1, 1, 1)
+    highlight.Parent = character
 end
 
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKeybind then
-        if keybindsEnabled then
-            notify("Keybinds are now visible.")
-        else
-            notify("Keybinds are now hidden.")
+local function removeESP(player)
+    local character = player.Character
+    if not character then return end
+
+    for _, child in pairs(character:GetChildren()) do
+        if child:IsA("Highlight") then
+            child:Destroy()
+        end
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if espEnabled then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                createESP(player)
+            end
+        end
+    else
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                removeESP(player)
+            end
         end
     end
 end)
 
+-- Addons:
 SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
