@@ -1,46 +1,48 @@
--- Создаем основной экран для Keybinds
+-- Создаем Watermark
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-local keybindsFrame = Instance.new("Frame")
-keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
-keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75) -- Центр экрана
-keybindsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-keybindsFrame.BorderSizePixel = 0
-keybindsFrame.Visible = false -- По умолчанию скрыт
-keybindsFrame.Parent = screenGui
+local watermarkFrame = Instance.new("Frame")
+watermarkFrame.Size = UDim2.new(0, 200, 0, 50)
+watermarkFrame.Position = UDim2.new(0.1, 0, 0.05, 0) -- Позиция по умолчанию
+watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+watermarkFrame.BorderSizePixel = 0
+watermarkFrame.Visible = true
+watermarkFrame.Parent = screenGui
 
-local keybindsTitle = Instance.new("TextLabel")
-keybindsTitle.Text = "Keybinds"
-keybindsTitle.Size = UDim2.new(1, 0, 0, 30)
-keybindsTitle.Position = UDim2.new(0, 0, 0, 0)
-keybindsTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-keybindsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-keybindsTitle.Font = Enum.Font.SourceSansBold
-keybindsTitle.TextSize = 18
-keybindsTitle.Parent = keybindsFrame
+local watermarkText = Instance.new("TextLabel")
+watermarkText.Text = "NL | About137 | Best Hvt Community Config | 40 ms"
+watermarkText.Size = UDim2.new(1, 0, 1, 0)
+watermarkText.Position = UDim2.new(0, 0, 0, 0)
+watermarkText.BackgroundTransparency = 1
+watermarkText.TextColor3 = Color3.fromRGB(255, 255, 255)
+watermarkText.Font = Enum.Font.SourceSansBold
+watermarkText.TextSize = 16
+watermarkText.TextXAlignment = Enum.TextXAlignment.Left
+watermarkText.TextYAlignment = Enum.TextYAlignment.Center
+watermarkText.Parent = watermarkFrame
 
-local keybindsList = Instance.new("TextLabel")
-keybindsList.Text = "[Keybind] Fly - F\n[Keybind] Noclip - N\n[Keybind] Speed Boost - LeftShift"
-keybindsList.Size = UDim2.new(1, -10, 1, -40)
-keybindsList.Position = UDim2.new(0, 5, 0, 35)
-keybindsList.BackgroundTransparency = 1
-keybindsList.TextColor3 = Color3.fromRGB(255, 255, 255)
-keybindsList.Font = Enum.Font.SourceSans
-keybindsList.TextSize = 16
-keybindsList.TextXAlignment = Enum.TextXAlignment.Left
-keybindsList.TextYAlignment = Enum.TextYAlignment.Top
-keybindsList.Parent = keybindsFrame
+-- Функция для обновления текста Watermark
+local function updateWatermark()
+    local ping = math.random(30, 50) -- Пример пинга (можно заменить на реальный)
+    watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config | %d ms", ping)
+end
 
--- Функция для перемещения Keybinds
+-- Обновляем Watermark каждую секунду
+while true do
+    updateWatermark()
+    wait(1)
+end
+
+-- Функция для перемещения Watermark
 local dragging = false
 local dragInput, dragStart, startPos
 
-keybindsTitle.InputBegan:Connect(function(input)
+watermarkFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = keybindsFrame.Position
+        startPos = watermarkFrame.Position
 
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
@@ -50,7 +52,7 @@ keybindsTitle.InputBegan:Connect(function(input)
     end
 end)
 
-keybindsTitle.InputChanged:Connect(function(input)
+watermarkFrame.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
@@ -59,38 +61,6 @@ end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if dragging and input == dragInput then
         local delta = input.Position - dragStart
-        keybindsFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Переключатель для Keybinds
-local keybindsEnabled = false
-local toggleKeybind = Enum.KeyCode.K -- Клавиша для переключения Keybinds
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKeybind then
-        keybindsEnabled = not keybindsEnabled
-        keybindsFrame.Visible = keybindsEnabled
-    end
-end)
-
--- Уведомление о включении/выключении Keybinds
-local function notify(message)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Keybinds",
-        Text = message,
-        Duration = 3
-    })
-end
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKeybind then
-        if keybindsEnabled then
-            notify("Keybinds are now visible.")
-        else
-            notify("Keybinds are now hidden.")
-        end
+        watermarkFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
