@@ -31,31 +31,44 @@ local Tabs = {
 
 local Options = Library.Options
 
--- Вкладка Main: Добавим кнопку для примера
-Tabs.Main:CreateButton{
-    Title = "Test Button",
-    Description = "This is a test button in the Main tab.",
-    Callback = function()
-        Library:Notify{
-            Title = "Main Tab",
-            Content = "You clicked the test button!",
-            Duration = 3
-        }
-    end
+-- Keybinds Data
+local keybindsList = {
+    { Name = "Fly", Key = "F" },
+    { Name = "Noclip", Key = "N" },
+    { Name = "Speed Boost", Key = "LeftShift" }
 }
+
+-- Функция для отображения Keybinds
+local function updateKeybindsDisplay()
+    local keybindsText = ""
+    for _, keybind in pairs(keybindsList) do
+        keybindsText = keybindsText .. string.format("[Keybind] %s - %s\n", keybind.Name, keybind.Key)
+    end
+    return keybindsText
+end
+
+-- Вкладка Visuals: Keybinds Display
+local keybindsParagraph = Tabs.Visuals:CreateParagraph("KeybindsDisplay", {
+    Title = "Keybinds",
+    Content = updateKeybindsDisplay(),
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 -- Вкладка Visuals: Переключатель Keybinds
 local KeybindsToggle = Tabs.Visuals:CreateToggle("KeybindsToggle", {
-    Title = "Keybinds",
+    Title = "Show Keybinds",
     Default = false,
     Callback = function(Value)
         if Value then
+            keybindsParagraph:SetValue(updateKeybindsDisplay())
             Library:Notify{
                 Title = "Keybinds",
                 Content = "Keybinds are now visible.",
                 Duration = 3
             }
         else
+            keybindsParagraph:SetValue("Keybinds are hidden.")
             Library:Notify{
                 Title = "Keybinds",
                 Content = "Keybinds are now hidden.",
