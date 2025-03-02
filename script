@@ -42,12 +42,11 @@ local Tabs = {
 
 local Options = Library.Options
 
--- Watermark
 local watermarkEnabled = true
 local watermarkFrame = Instance.new("Frame")
 watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
-watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40) -- Позиция внизу экрана
-watermarkFrame.AnchorPoint = Vector2.new(0.5, 1) -- Центрирование по горизонтали
+watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40)
+watermarkFrame.AnchorPoint = Vector2.new(0.5, 1)
 watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 watermarkFrame.BackgroundTransparency = 0.5
 watermarkFrame.BorderSizePixel = 0
