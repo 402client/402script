@@ -42,19 +42,17 @@ local Tabs = {
 
 local Options = Library.Options
 
-local watermarkEnabled = true
 local watermarkFrame = Instance.new("Frame")
 watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
 watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40)
-watermarkFrame.AnchorPoint = Vector2.new(0.5, 1)
+watermarkFrame.AnchorPoint = Vector2.new(0.5, 1) 
 watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-watermarkFrame.BackgroundTransparency = 0.5
 watermarkFrame.BorderSizePixel = 0
-watermarkFrame.Visible = watermarkEnabled
+watermarkFrame.Visible = true
 watermarkFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local watermarkText = Instance.new("TextLabel")
-watermarkText.Text = "402 client"
+watermarkText.Text = "NL | About137 | Best Hvt Community Config"
 watermarkText.Size = UDim2.new(1, 0, 1, 0)
 watermarkText.Position = UDim2.new(0, 0, 0, 0)
 watermarkText.BackgroundTransparency = 1
@@ -65,81 +63,65 @@ watermarkText.TextXAlignment = Enum.TextXAlignment.Left
 watermarkText.TextYAlignment = Enum.TextYAlignment.Center
 watermarkText.Parent = watermarkFrame
 
--- Watermark Toggle
-local watermarkToggle = Tabs.Main:CreateToggle("Watermark", {
-    Title = "Enable Watermark",
-    Default = true,
-    Callback = function(Value)
-        watermarkEnabled = Value
-        watermarkFrame.Visible = watermarkEnabled
+local function updateWatermark()
+    local ping = math.random(30, 50)
+    watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config")
+end
+
+spawn(function()
+    while true do
+        updateWatermark()
+        wait(1)
     end
-})
+end)
 
 -- ESP
 local espEnabled = false
+
+local function createESP(player)
+    local character = player.Character
+    if not character then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.FillColor = Color3.new(1, 0, 0)
+    highlight.OutlineColor = Color3.new(1, 1, 1)
+    highlight.Parent = character
+end
+
+local function removeESP(player)
+    local character = player.Character
+    if not character then return end
+
+    for _, child in pairs(character:GetChildren()) do
+        if child:IsA("Highlight") then
+            child:Destroy()
+        end
+    end
+end
+
+local function updateESP()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            if espEnabled then
+                createESP(player)
+            else
+                removeESP(player)
+            end
+        end
+    end
+end
+
+-- Переключатель ESP
 local espToggle = Tabs.Main:CreateToggle("ESP", {
     Title = "Enable ESP",
     Default = false,
     Callback = function(Value)
         espEnabled = Value
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                if Value then
-                    createESP(player)
-                else
-                    removeESP(player)
-                end
-            end
-        end
+        updateESP()
     end
 })
-
-local function createESP(player)
-    if player.Character and player.Character:FindFirstChild("Head") then
-        local box = Drawing.new("Square")
-        box.Visible = true
-        box.Color = Color3.new(1, 0, 0)
-        box.Thickness = 1
-        box.Transparency = 1
-
-        local function update()
-            if player.Character and player.Character:FindFirstChild("Head") then
-                local headPos, visible = workspace.CurrentCamera:WorldToViewportPoint(player.Character.Head.Position)
-                if visible then
-                    box.Size = Vector2.new(2000 / headPos.Z, 3000 / headPos.Z)
-                    box.Position = Vector2.new(headPos.X - box.Size.X / 2, headPos.Y - box.Size.Y / 2)
-                    box.Visible = true
-                else
-                    box.Visible = false
-                end
-            else
-                box.Visible = false
-            end
-        end
-
-        game:GetService("RunService").RenderStepped:Connect(update)
-
-        player.CharacterAdded:Connect(function(newCharacter)
-            newCharacter:WaitForChild("Head")
-            update()
-        end)
-    end
-end
-
-local function removeESP(player)
-    -- Удаление всех Drawing объектов для игрока
-    for _, v in pairs(Drawing) do
-        if v.Remove then
-            v:Remove()
-        end
-    end
-end
-
-game.Players.PlayerAdded:Connect(function(player)
-    if espEnabled and player ~= game.Players.LocalPlayer then
-        createESP(player)
-    end
-end)
 
 -- Addons:
 SaveManager:SetLibrary(Library)
