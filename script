@@ -1,137 +1,58 @@
--- Проверяем, что скрипт запущен в Solara
-if not is_sirhurt_closure and not syn then
-    error("This script is designed to run in Solara or similar executors.")
-end
+-- Настройки
+local bulletSpeed = 100 -- Скорость пули
+local traceDuration = 0.5 -- Длительность следа
+local traceColor = Color3.new(1, 1, 1) -- Белый цвет следа
+local traceTransparency = 0.5 -- Прозрачность следа
 
--- Создаем ScreenGui для интерфейса
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Функция для создания следа
+local function createBulletTrace(startPosition, direction)
+    local bullet = Instance.new("Part")
+    bullet.Size = Vector3.new(0.2, 0.2, 1)
+    bullet.Anchored = true
+    bullet.CanCollide = false
+    bullet.Transparency = 1
+    bullet.CFrame = CFrame.new(startPosition, startPosition + direction)
+    bullet.Parent = workspace
 
--- Watermark
-local watermarkFrame = Instance.new("Frame")
-watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
-watermarkFrame.Position = UDim2.new(0.1, 0, 0.05, 0) -- Позиция по умолчанию
-watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-watermarkFrame.BorderSizePixel = 0
-watermarkFrame.Visible = true
-watermarkFrame.Parent = screenGui
+    local trail = Instance.new("Trail")
+    trail.Attachment0 = Instance.new("Attachment", bullet)
+    trail.Attachment1 = Instance.new("Attachment", bullet)
+    trail.Attachment1.Position = Vector3.new(0, 0, -1)
+    trail.Color = ColorSequence.new(traceColor)
+    trail.Transparency = NumberSequence.new(traceTransparency)
+    trail.Lifetime = traceDuration
+    trail.Parent = bullet
 
-local watermarkText = Instance.new("TextLabel")
-watermarkText.Text = "NL | About137 | Best Hvt Community Config | 40 ms"
-watermarkText.Size = UDim2.new(1, 0, 1, 0)
-watermarkText.Position = UDim2.new(0, 0, 0, 0)
-watermarkText.BackgroundTransparency = 1
-watermarkText.TextColor3 = Color3.fromRGB(255, 255, 255)
-watermarkText.Font = Enum.Font.SourceSansBold
-watermarkText.TextSize = 16
-watermarkText.TextXAlignment = Enum.TextXAlignment.Left
-watermarkText.TextYAlignment = Enum.TextYAlignment.Center
-watermarkText.Parent = watermarkFrame
+    -- Движение пули
+    local startTime = tick()
+    local endTime = startTime + 10 -- Максимальное время полета пули (на случай, если она не столкнется)
+    
+    while tick() < endTime do
+        local deltaTime = tick() - startTime
+        local newPosition = startPosition + direction * bulletSpeed * deltaTime
+        bullet.Position = newPosition
 
--- Функция для обновления текста Watermark
-local function updateWatermark()
-    local ping = math.random(30, 50) -- Пример пинга (можно заменить на реальный)
-    watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config | %d ms", ping)
-end
-
--- Обновляем Watermark каждую секунду
-spawn(function()
-    while true do
-        updateWatermark()
-        wait(1)
-    end
-end)
-
--- Функция для перемещения Watermark
-local dragging = false
-local dragInput, dragStart, startPos
-
-watermarkFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = watermarkFrame.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-watermarkFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and input == dragInput then
-        local delta = input.Position - dragStart
-        watermarkFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Keybinds
-local keybindsFrame = Instance.new("Frame")
-keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
-keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75) -- Центр экрана
-keybindsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-keybindsFrame.BorderSizePixel = 0
-keybindsFrame.Visible = false -- По умолчанию скрыт
-keybindsFrame.Parent = screenGui
-
-local keybindsTitle = Instance.new("TextLabel")
-keybindsTitle.Text = "Keybinds"
-keybindsTitle.Size = UDim2.new(1, 0, 0, 30)
-keybindsTitle.Position = UDim2.new(0, 0, 0, 0)
-keybindsTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-keybindsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-keybindsTitle.Font = Enum.Font.SourceSansBold
-keybindsTitle.TextSize = 18
-keybindsTitle.Parent = keybindsFrame
-
-local keybindsList = Instance.new("TextLabel")
-keybindsList.Text = "[Keybind] Fly - F\n[Keybind] Noclip - N\n[Keybind] Speed Boost - LeftShift"
-keybindsList.Size = UDim2.new(1, -10, 1, -40)
-keybindsList.Position = UDim2.new(0, 5, 0, 35)
-keybindsList.BackgroundTransparency = 1
-keybindsList.TextColor3 = Color3.fromRGB(255, 255, 255)
-keybindsList.Font = Enum.Font.SourceSans
-keybindsList.TextSize = 16
-keybindsList.TextXAlignment = Enum.TextXAlignment.Left
-keybindsList.TextYAlignment = Enum.TextYAlignment.Top
-keybindsList.Parent = keybindsFrame
-
--- Переключатель для Keybinds
-local keybindsEnabled = false
-local toggleKeybind = Enum.KeyCode.K -- Клавиша для переключения Keybinds
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKeybind then
-        keybindsEnabled = not keybindsEnabled
-        keybindsFrame.Visible = keybindsEnabled
-    end
-end)
-
--- Уведомление о включении/выключении Keybinds
-local function notify(message)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Keybinds",
-        Text = message,
-        Duration = 3
-    })
-end
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKeybind then
-        if keybindsEnabled then
-            notify("Keybinds are now visible.")
-        else
-            notify("Keybinds are now hidden.")
+        -- Проверка на столкновение
+        local ray = Ray.new(bullet.Position, direction * bulletSpeed * deltaTime)
+        local hit, position = workspace:FindPartOnRay(ray, bullet)
+        
+        if hit then
+            bullet:Destroy()
+            break
         end
+
+        wait()
     end
+
+    bullet:Destroy()
+end
+
+-- Пример использования
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+
+mouse.Button1Down:Connect(function()
+    local startPosition = player.Character.Head.Position
+    local direction = (mouse.Hit.p - startPosition).unit
+    createBulletTrace(startPosition, direction)
 end)
