@@ -1,68 +1,47 @@
--- Настройки
-local bulletSpeed = 100 -- Скорость пули
-local traceDuration = 0.5 -- Длительность следа
-local traceColor = Color3.new(1, 1, 1) -- Белый цвет следа
-local traceTransparency = 0.5 -- Прозрачность следа
+-- Создание ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Функция для создания следа
-local function createBulletTrace(startPosition, direction)
-    local bullet = Instance.new("Part")
-    bullet.Size = Vector3.new(0.2, 0.2, 1)
-    bullet.Anchored = true
-    bullet.CanCollide = false
-    bullet.Transparency = 1
-    bullet.CFrame = CFrame.new(startPosition, startPosition + direction)
-    bullet.Parent = workspace
+-- Создание основного фрейма
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
-    -- Создаем луч (Beam) для следа
-    local attachment0 = Instance.new("Attachment", bullet)
-    local attachment1 = Instance.new("Attachment", bullet)
-    attachment1.Position = Vector3.new(0, 0, -1)
+-- Создание заголовка
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Text = "Настройки игры"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Parent = mainFrame
 
-    local beam = Instance.new("Beam", bullet)
-    beam.Attachment0 = attachment0
-    beam.Attachment1 = attachment1
-    beam.Color = ColorSequence.new(traceColor)
-    beam.Transparency = NumberSequence.new(traceTransparency)
-    beam.Width0 = 0.1
-    beam.Width1 = 0.1
+-- Создание кнопки для ночного режима
+local nightModeButton = Instance.new("TextButton")
+nightModeButton.Size = UDim2.new(0, 200, 0, 50)
+nightModeButton.Position = UDim2.new(0.5, -100, 0, 70)
+nightModeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+nightModeButton.Text = "Включить ночной режим"
+nightModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+nightModeButton.TextScaled = true
+nightModeButton.Parent = mainFrame
 
-    -- Движение пули
-    local startTime = tick()
-    local endTime = startTime + 10 -- Максимальное время полета пули
-
-    while tick() < endTime do
-        local deltaTime = tick() - startTime
-        local newPosition = startPosition + direction * bulletSpeed * deltaTime
-        bullet.Position = newPosition
-
-        -- Проверка на столкновение
-        local ray = Ray.new(bullet.Position, direction * bulletSpeed * deltaTime)
-        local hit, position = workspace:FindPartOnRay(ray, bullet)
-
-        if hit then
-            bullet:Destroy()
-            break
-        end
-
-        wait()
+-- Функция для включения ночного режима
+local function toggleNightMode()
+    local lighting = game:GetService("Lighting")
+    if lighting.Brightness > 0 then
+        lighting.Brightness = 0
+        lighting.ClockTime = 0
+    else
+        lighting.Brightness = 1
+        lighting.ClockTime = 12
     end
-
-    -- Плавное исчезновение следа
-    for i = 1, 10 do
-        beam.Transparency = NumberSequence.new(traceTransparency + (i * 0.1))
-        wait(traceDuration / 10)
-    end
-
-    bullet:Destroy()
 end
 
--- Пример использования
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
+nightModeButton.MouseButton1Click:Connect(toggleNightMode)
 
-mouse.Button1Down:Connect(function()
-    local startPosition = player.Character.Head.Position
-    local direction = (mouse.Hit.p - startPosition).unit
-    createBulletTrace(startPosition, direction)
-end)
+-- Добавление других настроек (например, скорость, высота прыжка и т.д.)
+-- Вы можете добавить больше элементов управления и функций по аналогии
