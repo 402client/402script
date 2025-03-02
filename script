@@ -31,7 +31,20 @@ local Tabs = {
 
 local Options = Library.Options
 
--- Keybinds Toggle
+-- Вкладка Main: Добавим кнопку для примера
+Tabs.Main:CreateButton{
+    Title = "Test Button",
+    Description = "This is a test button in the Main tab.",
+    Callback = function()
+        Library:Notify{
+            Title = "Main Tab",
+            Content = "You clicked the test button!",
+            Duration = 3
+        }
+    end
+}
+
+-- Вкладка Visuals: Переключатель Keybinds
 local KeybindsToggle = Tabs.Visuals:CreateToggle("KeybindsToggle", {
     Title = "Keybinds",
     Default = false,
