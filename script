@@ -27,6 +27,7 @@ local Tabs = {
 
 local Options = Library.Options
 
+-- Watermark
 local watermarkFrame = Instance.new("Frame")
 watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
 watermarkFrame.Position = UDim2.new(0.1, 0, 0.05, 0)
@@ -89,6 +90,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     end
 end)
 
+-- Keybinds
 local keybindsFrame = Instance.new("Frame")
 keybindsFrame.Size = UDim2.new(0, 200, 0, 150)
 keybindsFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
