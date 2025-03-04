@@ -169,3 +169,13 @@ Library:Notify{
 }
 
 SaveManager:LoadAutoloadConfig()
+
+queue_on_teleport([[
+    if game.PlaceId == 17625359962 or game.PlaceId == 71874690745115 then
+        if not getgenv().NameLoaderLoaded then
+            getgenv().NameLoaderLoaded = true
+            wait(2)
+            loadstring(game:HttpGet(('https://raw.githubusercontent.com/402client/402script/refs/heads/main/script')))()
+        end
+    end
+]])
