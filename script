@@ -1,173 +1,181 @@
-queue_on_teleport([[
-        local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-        local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-        local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+local function loadScript()
+    local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+    local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+    local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
-        local function renameServices()
-            local playersClient = game:FindFirstChild("Players - Client")
-            if playersClient then
-                playersClient.Name = "Players"
-            end
-
-            local workspaceClient = game:FindFirstChild("Workspace - Client")
-            if workspaceClient then
-                workspaceClient.Name = "Workspace"
-            end
+    local function renameServices()
+        local playersClient = game:FindFirstChild("Players - Client")
+        if playersClient then
+            playersClient.Name = "Players"
         end
 
-        renameServices()
-        wait(2)
+        local workspaceClient = game:FindFirstChild("Workspace - Client")
+        if workspaceClient then
+            workspaceClient.Name = "Workspace"
+        end
+    end
 
-        local Window = Library:CreateWindow{
-            Title = `Fluent {Library.Version}`,
-            SubTitle = "by Actual Master Oogway",
-            TabWidth = 160,
-            Size = UDim2.fromOffset(830, 525),
-            Resize = true,
-            MinSize = Vector2.new(470, 380),
-            Acrylic = true,
-            Theme = "Dark",
-            MinimizeKey = Enum.KeyCode.RightControl
+    renameServices()
+    wait(2)
+
+    local Window = Library:CreateWindow{
+        Title = `Fluent {Library.Version}`,
+        SubTitle = "by Actual Master Oogway",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(830, 525),
+        Resize = true,
+        MinSize = Vector2.new(470, 380),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.RightControl
+    }
+
+    local Tabs = {
+        Main = Window:CreateTab{
+            Title = "Main",
+            Icon = "phosphor-users-bold"
+        },
+        Settings = Window:CreateTab{
+            Title = "Settings",
+            Icon = "settings"
         }
+    }
 
-        local Tabs = {
-            Main = Window:CreateTab{
-                Title = "Main",
-                Icon = "phosphor-users-bold"
-            },
-            Settings = Window:CreateTab{
-                Title = "Settings",
-                Icon = "settings"
-            }
-        }
+    local Options = Library.Options
 
-        local Options = Library.Options
+    local watermarkFrame = Instance.new("Frame")
+    watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
+    watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40)
+    watermarkFrame.AnchorPoint = Vector2.new(0.5, 1)
+    watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    watermarkFrame.BorderSizePixel = 0
+    watermarkFrame.Visible = true
+    watermarkFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-        local watermarkFrame = Instance.new("Frame")
-        watermarkFrame.Size = UDim2.new(0, 300, 0, 30)
-        watermarkFrame.Position = UDim2.new(0.5, -150, 1, -40)
-        watermarkFrame.AnchorPoint = Vector2.new(0.5, 1)
-        watermarkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        watermarkFrame.BorderSizePixel = 0
-        watermarkFrame.Visible = true
-        watermarkFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    local watermarkText = Instance.new("TextLabel")
+    watermarkText.Text = "NL | About137 | Best Hvt Community Config"
+    watermarkText.Size = UDim2.new(1, 0, 1, 0)
+    watermarkText.Position = UDim2.new(0, 0, 0, 0)
+    watermarkText.BackgroundTransparency = 1
+    watermarkText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    watermarkText.Font = Enum.Font.SourceSansBold
+    watermarkText.TextSize = 16
+    watermarkText.TextXAlignment = Enum.TextXAlignment.Left
+    watermarkText.TextYAlignment = Enum.TextYAlignment.Center
+    watermarkText.Parent = watermarkFrame
 
-        local watermarkText = Instance.new("TextLabel")
-        watermarkText.Text = "NL | About137 | Best Hvt Community Config"
-        watermarkText.Size = UDim2.new(1, 0, 1, 0)
-        watermarkText.Position = UDim2.new(0, 0, 0, 0)
-        watermarkText.BackgroundTransparency = 1
-        watermarkText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        watermarkText.Font = Enum.Font.SourceSansBold
-        watermarkText.TextSize = 16
-        watermarkText.TextXAlignment = Enum.TextXAlignment.Left
-        watermarkText.TextYAlignment = Enum.TextYAlignment.Center
-        watermarkText.Parent = watermarkFrame
+    local function updateWatermark()
+        local ping = math.random(30, 50)
+        watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config")
+    end
 
-        local function updateWatermark()
-            local ping = math.random(30, 50)
-            watermarkText.Text = string.format("NL | About137 | Best Hvt Community Config")
+    spawn(function()
+        while true do
+            updateWatermark()
+            wait(1)
+        end
+    end)
+
+    local function createESP(player)
+        local character = player.Character
+        if not character then return end
+
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+
+        local espBox = Instance.new("Part")
+        espBox.Size = Vector3.new(4, 9, 4)
+        espBox.Anchored = true
+        espBox.CanCollide = false
+        espBox.Transparency = 0.5
+        espBox.Color = Color3.new(0, 1, 0)
+        espBox.Material = Enum.Material.Neon
+        espBox.CFrame = rootPart.CFrame
+        espBox.Parent = workspace
+
+        local function updateESPBox()
+            if not rootPart or not espBox then return end
+            espBox.CFrame = rootPart.CFrame
         end
 
-        spawn(function()
-            while true do
-                updateWatermark()
-                wait(1)
+        local connection = rootPart:GetPropertyChangedSignal("CFrame"):Connect(updateESPBox)
+
+        character:GetPropertyChangedSignal("Parent"):Connect(function()
+            if not character.Parent then
+                connection:Disconnect()
+                espBox:Destroy()
             end
         end)
+    end
 
-        local function createESP(player)
-            local character = player.Character
-            if not character then return end
+    local function removeESP(player)
+        local character = player.Character
+        if not character then return end
 
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if not rootPart then return end
-
-            local espBox = Instance.new("Part")
-            espBox.Size = Vector3.new(4, 9, 4)
-            espBox.Anchored = true
-            espBox.CanCollide = false
-            espBox.Transparency = 0.5
-            espBox.Color = Color3.new(0, 1, 0)
-            espBox.Material = Enum.Material.Neon
-            espBox.CFrame = rootPart.CFrame
-            espBox.Parent = workspace
-
-            local function updateESPBox()
-                if not rootPart or not espBox then return end
-                espBox.CFrame = rootPart.CFrame
-            end
-
-            local connection = rootPart:GetPropertyChangedSignal("CFrame"):Connect(updateESPBox)
-
-            character:GetPropertyChangedSignal("Parent"):Connect(function()
-                if not character.Parent then
-                    connection:Disconnect()
-                    espBox:Destroy()
-                end
-            end)
-        end
-
-        local function removeESP(player)
-            local character = player.Character
-            if not character then return end
-
-            for _, child in pairs(workspace:GetChildren()) do
-                if child:IsA("Part") and child.Name == "ESPBox" then
-                    child:Destroy()
-                end
+        for _, child in pairs(workspace:GetChildren()) do
+            if child:IsA("Part") and child.Name == "ESPBox" then
+                child:Destroy()
             end
         end
+    end
 
-        local function updateESP()
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer then
-                    if espEnabled then
-                        createESP(player)
-                    else
-                        removeESP(player)
-                    end
-                end
-            end
-        end
-
-        game.Players.PlayerAdded:Connect(function(player)
-            player.CharacterAdded:Connect(function()
+    local function updateESP()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
                 if espEnabled then
                     createESP(player)
+                else
+                    removeESP(player)
                 end
-            end)
-        end)
-
-        game.Players.PlayerRemoving:Connect(function(player)
-            removeESP(player)
-        end)
-
-        local espToggle = Tabs.Main:CreateToggle("ESP", {
-            Title = "Enable ESP",
-            Default = false,
-            Callback = function(Value)
-                espEnabled = Value
-                updateESP()
             end
-        })
+        end
+    end
 
-        SaveManager:SetLibrary(Library)
-        InterfaceManager:SetLibrary(Library)
-        SaveManager:IgnoreThemeSettings()
-        SaveManager:SetIgnoreIndexes{}
-        InterfaceManager:SetFolder("FluentScriptHub")
-        SaveManager:SetFolder("FluentScriptHub/specific-game")
-        InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-        SaveManager:BuildConfigSection(Tabs.Settings)
+    game.Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function()
+            if espEnabled then
+                createESP(player)
+            end
+        end)
+    end)
 
-        Window:SelectTab(1)
+    game.Players.PlayerRemoving:Connect(function(player)
+        removeESP(player)
+    end)
 
-        Library:Notify{
-            Title = "Fluent",
-            Content = "The script has been loaded.",
-            Duration = 8
-        }
+    local espToggle = Tabs.Main:CreateToggle("ESP", {
+        Title = "Enable ESP",
+        Default = false,
+        Callback = function(Value)
+            espEnabled = Value
+            updateESP()
+        end
+    })
 
-        SaveManager:LoadAutoloadConfig()
+    SaveManager:SetLibrary(Library)
+    InterfaceManager:SetLibrary(Library)
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes{}
+    InterfaceManager:SetFolder("FluentScriptHub")
+    SaveManager:SetFolder("FluentScriptHub/specific-game")
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
+
+    Window:SelectTab(1)
+
+    Library:Notify{
+        Title = "Fluent",
+        Content = "The script has been loaded.",
+        Duration = 8
+    }
+
+    SaveManager:LoadAutoloadConfig()
+end
+
+-- Запуск скрипта при первом инжекте
+loadScript()
+
+-- Очередь скрипта для выполнения после телепортации
+queue_on_teleport([[
+    loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/402client/402script/refs/heads/main/script"))()
 ]])
